@@ -33,31 +33,75 @@ def get_student_by_github(github):
 
     row = db_cursor.fetchone()
 
-    print("Student: {} {}\nGitHub account: {}".format(row[0], row[1], row[2]))
+    print(f'Student: {row[0]} {row[1]}\nGitHub account: {row[2]}')
+    # print("Student: {} {}\nGitHub account: {}".format(row[0], row[1], row[2]))
 
 
-def make_new_student(first_name, last_name, github):
+def make_new_student(first, last, github):
     """Add a new student and print confirmation.
 
     Given a first name, last name, and GitHub account, add student to the
     database and print a confirmation message.
     """
-    pass
+    QUERY = """
+        INSERT INTO students (first_name,last_name, github)
+            VALUES (:first_name, :last_name, :github)
+        """
 
+    db.session.execute(QUERY, {'first_name': first,
+                                'last_name': last,
+                                'github': github})
 
+    db.session.commit()
+
+    print(f'Successfully added student: {first} {last}')
+
+     
 def get_project_by_title(title):
     """Given a project title, print information about the project."""
-    pass
+    QUERY = """
+        SELECT title, description, max_grade
+        FROM projects
+        WHERE title = :title
+    """
+
+    cursor = db.session.execute(QUERY, {'title': title})
+
+    row = cursor.fetchone()
+
+    print(f'Title: {row.title} Description: {row.description} Max Grade: {row.max_grade}')
 
 
 def get_grade_by_github_title(github, title):
     """Print grade student received for a project."""
-    pass
+    QUERY = """
+        SELECT project_title, student_github, grade
+        FROM grades
+        WHERE student_github = :github
+        AND project_title = :title
+    """
+
+    cursor = db.session.execute(QUERY, {'github': github, 'title': title})
+
+    row = cursor.fetchone()
+
+    print(f'{title} received {row.grade}.')
 
 
 def assign_grade(github, title, grade):
     """Assign a student a grade on an assignment and print a confirmation."""
-    pass
+    QUERY = """
+        UPDATE grades
+        SET grade = :grade
+        WHERE student_github = :github
+        AND project_title = :title
+    """
+
+    db.session.execute(QUERY, {'grade': grade, 'github': github, 'title': title})
+    
+    db.session.commit()
+
+    print(f'{github} received {grade}.')
 
 
 def handle_input():
